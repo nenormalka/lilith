@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestFunnel(t *testing.T) {
+func TestFanIn(t *testing.T) {
 	for name, tt := range map[string]struct {
 		times int
 		want  map[int]int
@@ -44,7 +44,7 @@ func TestFunnel(t *testing.T) {
 				}()
 			}
 
-			dest := Funnel[int](sources...)
+			dest := FanIn[int](sources...)
 			got := make(map[int]int)
 
 			for d := range dest {
@@ -52,7 +52,7 @@ func TestFunnel(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Funnel() = %v, want %v", got, tt.want)
+				t.Errorf("FanIn() = %v, want %v", got, tt.want)
 			}
 		})
 	}
