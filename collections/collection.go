@@ -9,18 +9,16 @@ type (
 	}
 
 	Collection[T comparable] interface {
-		Iterator[T]
-
 		Add(elem T) bool
-		AddAll(elems []Collection[T]) bool
+		AddAll(elems Collection[T]) bool
 		Clear()
 		Contains(elem T) bool
-		ContainsAll(elems []Collection[T]) bool
-		Equals(elem T) bool
+		ContainsAll(elems Collection[T]) bool
+		Equals(elem Collection[T]) bool
 		IsEmpty() bool
 		Remove(elem T) bool
-		RemoveAll(elems []Collection[T]) bool
-		RetainAll(elems []Collection[T]) bool
+		RemoveAll(elems Collection[T]) bool
+		RetainAll(elems Collection[T]) bool
 		Size() int
 		ToArray() []T
 		RemoveIf(f Predicate[T])
