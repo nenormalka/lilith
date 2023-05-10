@@ -49,17 +49,44 @@ func (al *ArrayList[T]) Contains(elem T) bool {
 }
 
 func (al *ArrayList[T]) ContainsAll(elems Collection[T]) bool {
-	for j := range elems.ToArray() {
-		if !methods.InArray[[]T](al.data, elems.ToArray()[j]) {
+	if elems.Size() == 0 {
+		return true
+	}
+
+	if len(al.data) == 0 {
+		return false
+	}
+
+	m := methods.ArrayToMapValues[[]T](elems.ToArray())
+
+	for i := range al.data {
+		if _, ok := m[al.data[i]]; ok {
+			delete(m, al.data[i])
+		}
+	}
+
+	return len(m) == 0
+}
+
+func (al *ArrayList[T]) Equals(elem any) bool {
+	e, ok := elem.(List[T])
+	if !ok {
+		return false
+	}
+
+	if len(al.data) != e.Size() {
+		return false
+	}
+
+	arr := e.ToArray()
+
+	for i := range al.data {
+		if al.data[i] != arr[i] {
 			return false
 		}
 	}
 
 	return true
-}
-
-func (al *ArrayList[T]) Equals(elem Collection[T]) bool {
-	return Collection[T](al) == elem
 }
 
 func (al *ArrayList[T]) IsEmpty() bool {
@@ -86,19 +113,20 @@ func (al *ArrayList[T]) RemoveAll(elems Collection[T]) bool {
 
 	m := methods.ArrayToMapValues[[]T](elems.ToArray())
 	if len(m) == 0 {
-		return false
+		return true
 	}
 
 	isRemoved := false
 
-	for i := 0; i < l; i++ {
+	for i := 0; i < len(al.data); {
 		if _, ok := m[al.data[i]]; ok {
 			methods.ArrayRemove[[]T](&al.data, i)
-			i++
 
 			if !isRemoved {
 				isRemoved = true
 			}
+		} else {
+			i++
 		}
 	}
 
@@ -129,6 +157,8 @@ func (al *ArrayList[T]) RetainAll(elems Collection[T]) bool {
 		}
 	}
 
+	al.data = arr
+
 	return isUpdated
 }
 
@@ -141,30 +171,25 @@ func (al *ArrayList[T]) ToArray() []T {
 }
 
 func (al *ArrayList[T]) RemoveIf(f Predicate[T]) {
-	l := len(al.data)
-
-	for i := 0; i < l; i++ {
+	for i := 0; i < len(al.data); {
 		if f(al.data[i]) {
 			methods.ArrayRemove[[]T](&al.data, i)
+		} else {
 			i++
 		}
 	}
 }
 
 func (al *ArrayList[T]) AddList(indx int, elem T) bool {
-	arr := al.data[:indx]
-	arr = append(arr, elem)
-	al.data = append(arr, al.data[indx:]...)
+	methods.ArrayInsert[[]T](&al.data, indx, elem)
 
 	return true
 }
 
-func (al *ArrayList[T]) AddAllList(indx int, elems []T) bool {
-	arr := al.data[:indx]
-	arr = append(arr, elems...)
-	al.data = append(arr, al.data[indx:]...)
+func (al *ArrayList[T]) AddAllList(indx int, elems Collection[T]) bool {
+	methods.ArrayInsert[[]T](&al.data, indx, elems.ToArray()...)
 
-	return false
+	return true
 }
 
 func (al *ArrayList[T]) Get(indx int) (T, error) {

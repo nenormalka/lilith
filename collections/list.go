@@ -7,7 +7,7 @@ type (
 		Collection[T]
 
 		AddList(indx int, elem T) bool
-		AddAllList(indx int, elems []T) bool
+		AddAllList(indx int, elems Collection[T]) bool
 		Get(indx int) (T, error)
 		IndexOf(elem T) int
 		LastIndexOf(elem T) int

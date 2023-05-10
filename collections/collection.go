@@ -14,7 +14,7 @@ type (
 		Clear()
 		Contains(elem T) bool
 		ContainsAll(elems Collection[T]) bool
-		Equals(elem Collection[T]) bool
+		Equals(elem any) bool
 		IsEmpty() bool
 		Remove(elem T) bool
 		RemoveAll(elems Collection[T]) bool
