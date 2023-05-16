@@ -2,7 +2,7 @@ package patterns
 
 import "sync"
 
-func Funnel[T any](sources ...<-chan T) <-chan T {
+func FanIn[T any](sources ...<-chan T) <-chan T {
 	dest := make(chan T)
 	var wg sync.WaitGroup
 

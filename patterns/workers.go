@@ -10,7 +10,6 @@ type (
 	WorkFunc[T any] func(data T) error
 )
 
-// Workers Два последних параметра опциональны, если хочется больше мониторинга. Можно переслать nil
 func Workers[T any](
 	ctx context.Context,
 	f WorkFunc[T],

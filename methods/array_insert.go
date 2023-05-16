@@ -7,7 +7,5 @@ func ArrayInsert[S ~[]T, T any](s *S, indx int, elems ...T) {
 		return
 	}
 
-	elems = append(elems, (*s)[indx:]...)
-
-	*s = append((*s)[:indx], elems...)
+	*s = append((*s)[:indx], append(elems, (*s)[indx:]...)...)
 }

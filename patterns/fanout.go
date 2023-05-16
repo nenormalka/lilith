@@ -1,6 +1,6 @@
 package patterns
 
-func Split[T any](source <-chan T, n int) []<-chan T {
+func FanOut[T any](source <-chan T, n int) []<-chan T {
 	dests := make([]<-chan T, n)
 
 	for i := 0; i < n; i++ {

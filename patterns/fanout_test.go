@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestSplit(t *testing.T) {
+func TestFanOut(t *testing.T) {
 	for name, tt := range map[string]struct {
 		args  []int
 		want  map[int]struct{}
@@ -26,7 +26,7 @@ func TestSplit(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			source := make(chan int)
-			dests := Split(source, tt.count)
+			dests := FanOut(source, tt.count)
 
 			got := make(map[int]struct{})
 			m := sync.Mutex{}
@@ -54,7 +54,7 @@ func TestSplit(t *testing.T) {
 			wg.Wait()
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Split() = %v, want %v", got, tt.want)
+				t.Errorf("FanOut() = %v, want %v", got, tt.want)
 			}
 		})
 	}
