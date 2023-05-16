@@ -34,6 +34,7 @@
 29) MapKeys
 30) MapValues
 31) Ternary
+32) ArrayInsert
 
 ### Concurrency patterns
 1) Aggregate Channel
