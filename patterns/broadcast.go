@@ -26,7 +26,7 @@ func (b *Broadcast[T]) Subscribe() <-chan T {
 	return newListener
 }
 
-func (b *Broadcast[T]) CancelSubscription(channel <-chan T) {
+func (b *Broadcast[T]) Unsubscribe(channel <-chan T) {
 	for i, ch := range b.listeners {
 		if ch == channel {
 			b.listeners = append(b.listeners[:i], b.listeners[i+1:]...)
@@ -34,6 +34,10 @@ func (b *Broadcast[T]) CancelSubscription(channel <-chan T) {
 			break
 		}
 	}
+}
+
+func (b *Broadcast[T]) SubscribersCount() int {
+	return len(b.listeners)
 }
 
 func (b *Broadcast[T]) serve(ctx context.Context) {

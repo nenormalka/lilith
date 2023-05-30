@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	countTest = 3
+	countBroadcastTest = 3
 )
 
 func TestBroadcast(t *testing.T) {
@@ -18,9 +18,9 @@ func TestBroadcast(t *testing.T) {
 	m := make(map[int]int)
 	wg := sync.WaitGroup{}
 
-	wg.Add(countTest)
+	wg.Add(countBroadcastTest)
 
-	for i := 0; i < countTest; i++ {
+	for i := 0; i < countBroadcastTest; i++ {
 		ch := b.Subscribe()
 
 		go func(ch <-chan int) {
@@ -42,11 +42,11 @@ func TestBroadcast(t *testing.T) {
 	wg.Wait()
 
 	want := map[int]int{
-		1: countTest,
-		2: countTest,
-		3: countTest,
-		4: countTest,
-		5: countTest,
+		1: countBroadcastTest,
+		2: countBroadcastTest,
+		3: countBroadcastTest,
+		4: countBroadcastTest,
+		5: countBroadcastTest,
 	}
 
 	if !reflect.DeepEqual(m, want) {
