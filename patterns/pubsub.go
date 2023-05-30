@@ -63,7 +63,7 @@ func (b *Broker[T]) Publish(ctx context.Context, topic string, message T) error 
 }
 
 func (b *Broker[T]) Subscribe(topic string) (<-chan T, error) {
-	ch := make(<-chan T)
+	var ch <-chan T
 
 	err := b.processTopic(topic, func(t *Topic[T]) error {
 		ch = t.bc.Subscribe()
@@ -71,11 +71,7 @@ func (b *Broker[T]) Subscribe(topic string) (<-chan T, error) {
 		return nil
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
-	return ch, nil
+	return ch, err
 }
 
 func (b *Broker[T]) Unsubscribe(topic string, ch <-chan T) error {

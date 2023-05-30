@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestPubSub(t *testing.T) {
@@ -115,6 +116,8 @@ func TestPubSub(t *testing.T) {
 	if count != 3 {
 		t.Errorf("pubsub SubscribersCountByTopic() = %v, want %v", count, 3)
 	}
+
+	time.Sleep(100 * time.Millisecond)
 
 	err = broker.Unsubscribe("test 1", lastCh)
 	if err != nil {
