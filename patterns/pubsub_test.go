@@ -8,6 +8,8 @@ import (
 )
 
 func TestPubSub(t *testing.T) {
+	ctx := context.Background()
+
 	broker := NewBroker[int]()
 	ch, err := broker.Subscribe("test")
 	if err != ErrTopicNotFound {
@@ -18,29 +20,30 @@ func TestPubSub(t *testing.T) {
 		t.Errorf("pubsub Subscribe() ch = %v, want %v", ch, nil)
 	}
 
-	err = broker.Publish(context.Background(), "test", 1)
+	err = broker.Publish(ctx, "test", 1)
 	if err != ErrTopicNotFound {
 		t.Errorf("pubsub Publish() error = %v, want %v", err, ErrTopicNotFound)
 	}
 
-	err = broker.CreateTopic(context.Background(), "test 1")
+	err = broker.CreateTopic(ctx, "test 1")
 	if err != nil {
 		t.Errorf("pubsub CreateTopic() error = %v, want %v", err, nil)
 	}
 
-	err = broker.CreateTopic(context.Background(), "test 2")
+	err = broker.CreateTopic(ctx, "test 2")
 	if err != nil {
 		t.Errorf("pubsub CreateTopic() error = %v, want %v", err, nil)
 	}
 
-	err = broker.CreateTopic(context.Background(), "test 1")
+	err = broker.CreateTopic(ctx, "test 1")
 	if err != ErrTopicAlreadyExists {
 		t.Errorf("pubsub CreateTopic() error = %v, want %v", err, ErrTopicAlreadyExists)
 	}
 
 	mu := sync.Mutex{}
 	m := make(map[int]int)
-	countClosed := 0
+	wg := sync.WaitGroup{}
+	wg.Add(5)
 
 	lastCh := ch
 
@@ -51,14 +54,9 @@ func TestPubSub(t *testing.T) {
 		}
 
 		go func(ch <-chan int) {
-			defer func() {
-				mu.Lock()
-				countClosed++
-				mu.Unlock()
-			}()
+			defer wg.Done()
 
 			for data := range ch {
-				println(data)
 				mu.Lock()
 				m[data]++
 				mu.Unlock()
@@ -75,14 +73,9 @@ func TestPubSub(t *testing.T) {
 		}
 
 		go func(ch <-chan int) {
-			defer func() {
-				mu.Lock()
-				countClosed++
-				mu.Unlock()
-			}()
+			defer wg.Done()
 
 			for data := range ch {
-				println(data)
 				mu.Lock()
 				m[data]++
 				mu.Unlock()
@@ -90,17 +83,17 @@ func TestPubSub(t *testing.T) {
 		}(ch)
 	}
 
-	err = broker.Publish(context.Background(), "test 1", 1)
+	err = broker.Publish(ctx, "test 1", 1)
 	if err != nil {
 		t.Errorf("pubsub Publish() error = %v, want %v", err, nil)
 	}
 
-	err = broker.Publish(context.Background(), "test 1", 2)
+	err = broker.Publish(ctx, "test 1", 2)
 	if err != nil {
 		t.Errorf("pubsub Publish() error = %v, want %v", err, nil)
 	}
 
-	err = broker.Publish(context.Background(), "test 2", 3)
+	err = broker.Publish(ctx, "test 2", 3)
 	if err != nil {
 		t.Errorf("pubsub Publish() error = %v, want %v", err, nil)
 	}
@@ -137,6 +130,26 @@ func TestPubSub(t *testing.T) {
 		t.Errorf("pubsub SubscribersCountByTopic() = %v, want %v", count, 2)
 	}
 
+	err = broker.CloseTopic("test 1")
+	if err != nil {
+		t.Errorf("pubsub CloseTopic() error = %v, want %v", err, nil)
+	}
+
+	count, err = broker.SubscribersCountAll()
+	if err != nil {
+		t.Errorf("pubsub SubscribersCountAll() error = %v, want %v", err, nil)
+	}
+
+	if count != 2 {
+		t.Errorf("pubsub SubscribersCountAll() = %v, want %v", count, 2)
+	}
+
+	err = broker.CloseAll()
+	if err != nil {
+		t.Errorf("pubsub CloseAll() error = %v, want %v", err, nil)
+	}
+
+	wg.Wait()
 	want := map[int]int{
 		1: 3,
 		2: 3,
@@ -145,5 +158,10 @@ func TestPubSub(t *testing.T) {
 
 	if !reflect.DeepEqual(m, want) {
 		t.Errorf("broadcast = %v, want %v", m, want)
+	}
+
+	err = broker.CloseAll()
+	if err != ErrBrokerClosed {
+		t.Errorf("pubsub CloseAll() error = %v, want %v", err, nil)
 	}
 }

@@ -1,17 +1,22 @@
 package patterns
 
-import "context"
+import (
+	"context"
+	"sync"
+)
 
 type (
 	Broadcast[T any] struct {
 		source    <-chan T
 		listeners []chan T
+		mu        sync.Mutex
 	}
 )
 
 func NewBroadcast[T any](ctx context.Context, source <-chan T) *Broadcast[T] {
 	b := &Broadcast[T]{
 		source: source,
+		mu:     sync.Mutex{},
 	}
 
 	go b.serve(ctx)
@@ -20,6 +25,9 @@ func NewBroadcast[T any](ctx context.Context, source <-chan T) *Broadcast[T] {
 }
 
 func (b *Broadcast[T]) Subscribe() <-chan T {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	newListener := make(chan T)
 	b.listeners = append(b.listeners, newListener)
 
@@ -27,6 +35,9 @@ func (b *Broadcast[T]) Subscribe() <-chan T {
 }
 
 func (b *Broadcast[T]) Unsubscribe(channel <-chan T) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+
 	for i, ch := range b.listeners {
 		if ch == channel {
 			b.listeners = append(b.listeners[:i], b.listeners[i+1:]...)
@@ -58,6 +69,8 @@ func (b *Broadcast[T]) serve(ctx context.Context) {
 				return
 			}
 
+			b.mu.Lock()
+
 			for _, listener := range b.listeners {
 				if listener == nil {
 					continue
@@ -67,10 +80,10 @@ func (b *Broadcast[T]) serve(ctx context.Context) {
 				case listener <- val:
 				case <-ctx.Done():
 					return
-				default:
-
 				}
 			}
+
+			b.mu.Unlock()
 		}
 	}
 }
