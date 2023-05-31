@@ -3,7 +3,7 @@ package structures
 import "testing"
 
 func TestNewTree(t *testing.T) {
-	tr, err := NewTree([]*ItemTree[int]{
+	tr, err := NewTree([]*ItemTree[int, int]{
 		{
 			Value:    100,
 			ID:       1,
@@ -40,7 +40,11 @@ func TestNewTree(t *testing.T) {
 		t.Error(err)
 	}
 
-	res := tr.SearchNode(600)
+	res, err := tr.SearchNodeByValue(600)
+	if err != nil {
+		t.Error(err)
+	}
+
 	if res == nil {
 		t.Error("node not found")
 	}
@@ -49,7 +53,61 @@ func TestNewTree(t *testing.T) {
 		t.Error("wrong node")
 	}
 
-	tr, err = NewTree([]*ItemTree[int]{})
+	res, err = tr.SearchNodeByValue(111)
+	if err != ErrNodeNotFound {
+		t.Error(err)
+	}
+
+	res, err = tr.SearchNodeByID(6)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if res == nil {
+		t.Error("node not found")
+	}
+
+	if res.Data.Value != 600 {
+		t.Error("wrong node")
+	}
+
+	if err = tr.InsertWithParent(&NodeTree[int, int]{
+		Data:     &ItemTree[int, int]{Value: 700, ID: 7, ParentID: 6},
+		Children: nil,
+	}); err != nil {
+		t.Error(err)
+	}
+
+	if err = tr.InsertWithParent(nil); err != ErrInvalidNode {
+		t.Error(err)
+	}
+
+	if err = tr.InsertWithParent(&NodeTree[int, int]{
+		Data:     &ItemTree[int, int]{Value: 800, ID: 8, ParentID: 666},
+		Children: nil,
+	}); err != ErrNodeNotFound {
+		t.Error(err)
+	}
+
+	c, err := tr.GetChildren(6)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(c) == 0 {
+		t.Error("children not found")
+	}
+
+	if c[0].Data.Value != 700 {
+		t.Error("wrong children")
+	}
+
+	c, err = tr.GetChildren(666)
+	if err != ErrNodeNotFound {
+		t.Error(err)
+	}
+
+	tr, err = NewTree([]*ItemTree[int, int]{})
 	if err != ErrEmptyItems {
 		t.Errorf("expected error %v, got %v", ErrEmptyItems, err)
 	}
@@ -58,7 +116,7 @@ func TestNewTree(t *testing.T) {
 		t.Error("expected nil, got not nil")
 	}
 
-	tr, err = NewTree([]*ItemTree[int]{
+	tr, err = NewTree([]*ItemTree[int, int]{
 		{
 			Value:    1,
 			ID:       1,
@@ -79,7 +137,7 @@ func TestNewTree(t *testing.T) {
 		t.Error("expected nil, got not nil")
 	}
 
-	tr, err = NewTree([]*ItemTree[int]{
+	tr, err = NewTree([]*ItemTree[int, int]{
 		{
 			Value:    1,
 			ID:       1,

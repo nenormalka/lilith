@@ -3,19 +3,20 @@ package structures
 import "errors"
 
 type (
-	ItemTree[T comparable] struct {
+	ItemTree[T, M comparable] struct {
 		Value    T
-		ID       T
-		ParentID T
+		ID       M
+		ParentID M
 	}
 
-	NodeTree[T comparable] struct {
-		Data     *ItemTree[T]
-		Children []*NodeTree[T]
+	NodeTree[T, M comparable] struct {
+		Data     *ItemTree[T, M]
+		Children []*NodeTree[T, M]
 	}
 
-	Tree[T comparable] struct {
-		Root *NodeTree[T]
+	Tree[T, M comparable] struct {
+		Root *NodeTree[T, M]
+		m    map[M]*NodeTree[T, M]
 	}
 )
 
@@ -23,24 +24,26 @@ var (
 	ErrManyRootNodes  = errors.New("many root nodes")
 	ErrEmptyItems     = errors.New("empty items")
 	ErrEmptyRootNodes = errors.New("empty root nodes")
+	ErrNodeNotFound   = errors.New("node not found")
+	ErrInvalidNode    = errors.New("invalid node")
 )
 
-func NewTree[T comparable](items []*ItemTree[T]) (*Tree[T], error) {
+func NewTree[T, M comparable](items []*ItemTree[T, M]) (*Tree[T, M], error) {
 	if len(items) == 0 {
 		return nil, ErrEmptyItems
 	}
 
-	mapItems := make(map[T]*NodeTree[T], len(items))
+	mapItems := make(map[M]*NodeTree[T, M], len(items))
 
 	for i := range items {
-		mapItems[items[i].ID] = &NodeTree[T]{
+		mapItems[items[i].ID] = &NodeTree[T, M]{
 			Data: items[i],
 		}
 	}
 
 	var (
-		rootNodes []*NodeTree[T]
-		emptyElem T
+		rootNodes []*NodeTree[T, M]
+		emptyElem M
 	)
 
 	for _, node := range mapItems {
@@ -66,20 +69,57 @@ func NewTree[T comparable](items []*ItemTree[T]) (*Tree[T], error) {
 		return nil, ErrManyRootNodes
 	}
 
-	return &Tree[T]{Root: rootNodes[0]}, nil
+	return &Tree[T, M]{
+		Root: rootNodes[0],
+		m:    mapItems,
+	}, nil
 }
 
-func (t *Tree[T]) SearchNode(value T) *NodeTree[T] {
+func (t *Tree[T, M]) GetChildren(parentID M) ([]*NodeTree[T, M], error) {
+	parent, ok := t.m[parentID]
+	if !ok {
+		return nil, ErrNodeNotFound
+	}
+
+	return parent.Children, nil
+}
+
+func (t *Tree[T, M]) InsertWithParent(node *NodeTree[T, M]) error {
+	if node == nil {
+		return ErrInvalidNode
+	}
+
+	parent, ok := t.m[node.Data.ParentID]
+	if !ok {
+		return ErrNodeNotFound
+	}
+
+	parent.Children = append(parent.Children, node)
+	t.m[node.Data.ID] = node
+
+	return nil
+}
+
+func (t *Tree[T, M]) SearchNodeByID(id M) (*NodeTree[T, M], error) {
+	node, ok := t.m[id]
+	if !ok {
+		return nil, ErrNodeNotFound
+	}
+
+	return node, nil
+}
+
+func (t *Tree[T, M]) SearchNodeByValue(value T) (*NodeTree[T, M], error) {
 	res, found := t.searchNode(t.Root, value)
 
 	if !found {
-		return nil
+		return nil, ErrNodeNotFound
 	}
 
-	return res
+	return res, nil
 }
 
-func (t *Tree[T]) searchNode(node *NodeTree[T], value T) (*NodeTree[T], bool) {
+func (t *Tree[T, M]) searchNode(node *NodeTree[T, M], value T) (*NodeTree[T, M], bool) {
 	if node.Data.Value == value {
 		return node, true
 	}
