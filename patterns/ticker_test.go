@@ -28,6 +28,8 @@ func TestTicker(t *testing.T) {
 	wg.Wait()
 	cancel()
 
+	time.Sleep(2 * time.Second)
+
 	if i != 4 {
 		t.Errorf("Ticker() = %v, want %v", i, 4)
 	}

@@ -21,6 +21,7 @@ func Ticker(
 		for {
 			select {
 			case <-ctx.Done():
+				return
 			case <-ticker.C:
 				f()
 			}
