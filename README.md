@@ -55,3 +55,5 @@
 16) Wrap
 17) PubSub
 18) MutexBucket
+19) Ticker
+20) Semaphore
