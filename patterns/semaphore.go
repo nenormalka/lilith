@@ -7,7 +7,7 @@ import (
 
 type (
 	Semaphore struct {
-		с chan struct{}
+		c chan struct{}
 	}
 )
 
@@ -19,17 +19,17 @@ func (s *Semaphore) AcquireCtx(ctx context.Context) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
-	case s.с <- struct{}{}:
+	case s.c <- struct{}{}:
 		return nil
 	}
 }
 
 func (s *Semaphore) Acquire() {
-	s.с <- struct{}{}
+	s.c <- struct{}{}
 }
 
 func (s *Semaphore) Release() {
-	<-s.с
+	<-s.c
 }
 
 func NewSemaphore(n int) (*Semaphore, error) {
@@ -37,5 +37,5 @@ func NewSemaphore(n int) (*Semaphore, error) {
 		return nil, ErrInvalidCount
 	}
 
-	return &Semaphore{с: make(chan struct{}, n)}, nil
+	return &Semaphore{c: make(chan struct{}, n)}, nil
 }
