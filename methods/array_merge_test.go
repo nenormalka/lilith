@@ -22,6 +22,10 @@ func TestArrayMergeInt(t *testing.T) {
 			args: [][]int{{1, 2, 3}},
 			want: []int{1, 2, 3},
 		},
+		"#4": {
+			args: [][]int{{1, 2, 3}, nil, {4}, {}, {5}},
+			want: []int{1, 2, 3, 4, 5},
+		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			if got := ArrayMerge[[]int](tt.args...); !reflect.DeepEqual(got, tt.want) {
