@@ -57,4 +57,6 @@
 17) PubSub
 18) MutexBucket
 19) Ticker
-20) Semaphore
+20) TickerV2
+21) Semaphore
+22) SingleFlight
