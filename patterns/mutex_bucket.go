@@ -7,6 +7,8 @@ type (
 		mu     [SegmentCount]sync.RWMutex
 		bucket [SegmentCount]*T
 	}
+
+	MutexBucketFunc[T any] func(p *T) error
 )
 
 const (
@@ -21,7 +23,7 @@ func NewMutexBucket[T any](elems [SegmentCount]*T) *MutexBucket[T] {
 	}
 }
 
-func (mb *MutexBucket[T]) UnderLock(identifier int64, f func(p *T) error) error {
+func (mb *MutexBucket[T]) UnderLock(identifier int64, f MutexBucketFunc[T]) error {
 	segment := mb.getSegment(identifier)
 
 	mb.mu[segment].Lock()
@@ -30,7 +32,7 @@ func (mb *MutexBucket[T]) UnderLock(identifier int64, f func(p *T) error) error 
 	return f(mb.bucket[segment])
 }
 
-func (mb *MutexBucket[T]) UnderReadLock(identifier int64, f func(p *T) error) error {
+func (mb *MutexBucket[T]) UnderReadLock(identifier int64, f MutexBucketFunc[T]) error {
 	segment := mb.getSegment(identifier)
 
 	mb.mu[segment].RLock()
