@@ -36,7 +36,7 @@
 31) Ternary
 32) ArrayInsert
 33) ArrayStructToArrayValuesByField
-34) ArrayToMapValuesBool
+34) ArrayToMapValuesBool 
 
 ### Concurrency patterns
 1) Aggregate Channel
