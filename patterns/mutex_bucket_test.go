@@ -10,7 +10,7 @@ func TestMutexBucket(t *testing.T) {
 		count int
 	}
 
-	mb := NewMutexBucket[test](func() [SegmentCount]*test {
+	mb := NewMutexBucket[*test](func() [SegmentCount]*test {
 		var elems [SegmentCount]*test
 		for i := 0; i < SegmentCount; i++ {
 			elems[i] = &test{count: 0}

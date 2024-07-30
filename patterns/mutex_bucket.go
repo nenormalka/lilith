@@ -5,10 +5,10 @@ import "sync"
 type (
 	MutexBucket[T any] struct {
 		mu     [SegmentCount]sync.RWMutex
-		bucket [SegmentCount]*T
+		bucket [SegmentCount]T
 	}
 
-	MutexBucketFunc[T any] func(p *T) error
+	MutexBucketFunc[T any] func(p T) error
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 	segmentAndOpVal = SegmentCount - 1
 )
 
-func NewMutexBucket[T any](elems [SegmentCount]*T) *MutexBucket[T] {
+func NewMutexBucket[T any](elems [SegmentCount]T) *MutexBucket[T] {
 	return &MutexBucket[T]{
 		mu:     [SegmentCount]sync.RWMutex{},
 		bucket: elems,
