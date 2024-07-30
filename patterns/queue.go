@@ -183,6 +183,9 @@ func (q *Queue[T, M]) removeNode(n *node[T, M]) {
 	}
 
 	delete(q.m, n.info.Key)
+	if len(q.m) == 0 {
+		q.m = make(map[M]*node[T, M])
+	}
 }
 
 func (q *Queue[T, M]) setNode(n *node[T, M]) {
