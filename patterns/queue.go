@@ -154,11 +154,11 @@ func (q *Queue[T, M]) PopByChannelWithReqTime(reqTime time.Duration) (<-chan Nod
 	return q.ch, nil
 }
 
-func (q *Queue[T, M]) Size() uint64 {
+func (q *Queue[T, M]) Size() int {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	return uint64(len(q.m))
+	return len(q.m)
 }
 
 func (q *Queue[T, M]) Close() {

@@ -61,3 +61,4 @@
 20) TickerV2
 21) Semaphore
 22) SingleFlight
+23) Queue
