@@ -53,12 +53,11 @@
 12) Fan-Out
 13) Throttle
 14) Workers
-15) Workers Curator
-16) Wrap
-17) PubSub
-18) MutexBucket
-19) Ticker
-20) TickerV2
-21) Semaphore
-22) SingleFlight
-23) Queue
+15) Wrap
+16) PubSub
+17) MutexBucket
+18) Ticker
+19) TickerV2
+20) Semaphore
+21) SingleFlight
+22) Queue

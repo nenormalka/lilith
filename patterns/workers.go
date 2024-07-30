@@ -2,38 +2,31 @@ package patterns
 
 import (
 	"context"
-	"fmt"
 	"sync"
 )
 
 type (
-	WorkFunc[T any] func(data T) error
+	WorkFunc[T any] func(data T)
 )
 
 func Workers[T any](
 	ctx context.Context,
 	f WorkFunc[T],
-	n int,
-	wg *sync.WaitGroup,
+	n uint,
 	source <-chan T,
-	errCh chan error,
-	panicCh chan struct{},
-) {
-	wg.Add(n)
+) <-chan struct{} {
+	wg := &sync.WaitGroup{}
+	wg.Add(int(n))
 
-	for i := 0; i < n; i++ {
+	done := make(chan struct{})
+	go func() {
+		wg.Wait()
+		close(done)
+	}()
+
+	for i := 0; i < int(n); i++ {
 		go func() {
-			defer func() {
-				if r := recover(); r != nil {
-					fmt.Printf("worker panic %v", r)
-
-					if panicCh != nil {
-						panicCh <- struct{}{}
-					}
-				}
-
-				wg.Done()
-			}()
+			defer wg.Done()
 
 			for {
 				select {
@@ -44,14 +37,11 @@ func Workers[T any](
 						return
 					}
 
-					if err := f(data); err != nil && errCh != nil {
-						select {
-						case errCh <- err:
-						default:
-						}
-					}
+					f(data)
 				}
 			}
 		}()
 	}
+
+	return done
 }

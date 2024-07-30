@@ -14,7 +14,7 @@ func TestWorkers(t *testing.T) {
 	for name, tt := range map[string]struct {
 		args  []int
 		want  map[int]struct{}
-		count int
+		count uint
 		f     WorkFunc[int]
 	}{
 		"#1": {
@@ -27,19 +27,16 @@ func TestWorkers(t *testing.T) {
 				5: {},
 			},
 			count: 3,
-			f: func(data int) error {
+			f: func(data int) {
 				mu.Lock()
 				m[data] = struct{}{}
 				mu.Unlock()
-
-				return nil
 			},
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
 			source := make(chan int)
-			wg := &sync.WaitGroup{}
-			Workers(context.Background(), tt.f, tt.count, wg, source, nil, nil)
+			done := Workers(context.Background(), tt.f, tt.count, source)
 
 			go func() {
 				defer close(source)
@@ -49,7 +46,7 @@ func TestWorkers(t *testing.T) {
 				}
 			}()
 
-			wg.Wait()
+			<-done
 
 			if !reflect.DeepEqual(m, tt.want) {
 				t.Errorf("Workers() = %v, want %v", m, tt.want)
