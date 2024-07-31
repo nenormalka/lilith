@@ -53,7 +53,7 @@ func WithChannel[T any, M comparable]() QueueOption[T, M] {
 }
 
 // NewQueue creates a new queue with the given options.
-// Use one of the methods Pop/PopByKey or PopByChannelWithReqTime to get the value from the queue.
+// Use one of the methods Pop/PopByKey or PopByChannel to get the value from the queue.
 func NewQueue[T any, M comparable](opts ...QueueOption[T, M]) *Queue[T, M] {
 	q := &Queue[T, M]{
 		m:  make(map[M]*node[T, M]),
@@ -120,7 +120,7 @@ func (q *Queue[T, M]) PopByKey(key M) (NodeInfo[T, M], error) {
 	return NodeInfo[T, M]{}, ErrKeyDoesNotExist
 }
 
-func (q *Queue[T, M]) PopByChannelWithReqTime(reqTime time.Duration) (<-chan NodeInfo[T, M], error) {
+func (q *Queue[T, M]) PopByChannel(reqTime time.Duration) (<-chan NodeInfo[T, M], error) {
 	if q.ch == nil {
 		return nil, ErrEmptyChannel
 	}

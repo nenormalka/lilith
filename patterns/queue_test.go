@@ -113,7 +113,7 @@ func TestQueue(t *testing.T) {
 		t.Fatalf("expected error to be ErrEmptyQueue, got %v", err)
 	}
 
-	_, err = q.PopByChannelWithReqTime(500 * time.Millisecond)
+	_, err = q.PopByChannel(500 * time.Millisecond)
 	if !errors.Is(err, ErrEmptyChannel) {
 		t.Fatalf("expected error to be ErrEmptyChannel, got %v", err)
 	}
@@ -142,7 +142,7 @@ func TestQueueWithChannel(t *testing.T) {
 	q.Push(1, "key1", "value1")
 	q.Push(2, "key2", "value2")
 
-	ch, err := q.PopByChannelWithReqTime(500 * time.Millisecond)
+	ch, err := q.PopByChannel(500 * time.Millisecond)
 	if err != nil {
 		t.Fatal("unexpected error:", err)
 	}
