@@ -70,7 +70,7 @@ func TestThrottle(t *testing.T) {
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
-			th := Throttle(tt.e, tt.max, tt.refill, tt.d)
+			th := Throttle(tt.ctx, tt.e, tt.max, tt.refill, tt.d)
 			for i := 0; i < tt.times; i++ {
 				got, err := th(tt.ctx)
 				if !reflect.DeepEqual(got, tt.want[i].res) {

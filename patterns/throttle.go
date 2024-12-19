@@ -11,11 +11,38 @@ var (
 	ErrToManyCalls = errors.New("too many calls")
 )
 
-func Throttle[T any](e Effector[T], max, refill uint, d time.Duration) Effector[T] {
+func Throttle[T any](
+	ctx context.Context,
+	e Effector[T],
+	max, refill uint,
+	d time.Duration,
+) Effector[T] {
 	var (
 		tokens = max
-		once   sync.Once
+		mu     sync.Mutex
 	)
+
+	go func() {
+		ticker := time.NewTicker(d)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				mu.Lock()
+
+				t := tokens + refill
+				if t > max {
+					t = max
+				}
+				tokens = t
+
+				mu.Unlock()
+			}
+		}
+	}()
 
 	return func(ctx context.Context) (T, error) {
 		var response T
@@ -23,24 +50,8 @@ func Throttle[T any](e Effector[T], max, refill uint, d time.Duration) Effector[
 			return response, ctx.Err()
 		}
 
-		once.Do(func() {
-			ticker := time.NewTicker(d)
-			go func() {
-				defer ticker.Stop()
-				for {
-					select {
-					case <-ctx.Done():
-						return
-					case <-ticker.C:
-						t := tokens + refill
-						if t > max {
-							t = max
-						}
-						tokens = t
-					}
-				}
-			}()
-		})
+		mu.Lock()
+		defer mu.Unlock()
 
 		if tokens <= 0 {
 			return response, ErrToManyCalls
