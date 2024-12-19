@@ -39,12 +39,12 @@ func (bg *BoolGenerator) Bool() bool {
 	bg.mu.Lock()
 	defer bg.mu.Unlock()
 
-	if bg.remaining == 0 || bg.cache == 0 {
+	if bg.remaining == 0 {
 		bg.cache, bg.remaining = bg.src.Int63(), 63
 	}
 
 	result := bg.cache&bg.rate == bg.rate
-	bg.cache >>= bg.rate
+	bg.cache >>= 1
 	bg.remaining--
 
 	return result
