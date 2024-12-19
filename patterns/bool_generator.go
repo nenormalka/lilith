@@ -17,7 +17,7 @@ type (
 		src       rand.Source
 		mu        sync.Mutex
 		cache     int64
-		times     int64
+		rate      int64
 		remaining int
 	}
 
@@ -43,7 +43,7 @@ func (bg *BoolGenerator) Bool() bool {
 		bg.cache, bg.remaining = bg.src.Int63(), 63
 	}
 
-	result := bg.cache&bg.times == bg.times
+	result := bg.cache&bg.rate == bg.rate
 	bg.cache >>= 1
 	bg.remaining--
 
@@ -53,12 +53,12 @@ func (bg *BoolGenerator) Bool() bool {
 func (bg *BoolGenerator) setRate(chance Chance) {
 	switch chance {
 	case ChanceHalf:
-		bg.times = 2
+		bg.rate = 2
 	case ChanceQuarter:
-		bg.times = 3
+		bg.rate = 3
 	case ChanceEighth:
-		bg.times = 7
+		bg.rate = 7
 	default:
-		bg.times = 2
+		bg.rate = 2
 	}
 }
