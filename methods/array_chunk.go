@@ -28,7 +28,9 @@ func ArrayChunk[S ~[]T, T any](s S, size int) ([]S, error) {
 			end = length
 		}
 
-		n = append(n, s[i*size:end])
+		arr := make(S, end-i*size)
+		copy(arr, s[i*size:end])
+		n = append(n, arr)
 		i++
 	}
 
