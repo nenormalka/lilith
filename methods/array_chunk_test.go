@@ -13,7 +13,7 @@ func TestArrayChunkInt(t *testing.T) {
 		want [][]int
 	}{
 		"#1": {
-			args: nil,
+			args: []int{1, 2, 3, 4, 5},
 			size: 0,
 			want: nil,
 			err:  ErrArrayChunkSize,
@@ -50,7 +50,7 @@ func TestArrayChunkStr(t *testing.T) {
 		want [][]string
 	}{
 		"#1": {
-			args: nil,
+			args: []string{"t", "e", "s", "t"},
 			size: 0,
 			want: nil,
 			err:  ErrArrayChunkSize,
@@ -92,7 +92,20 @@ func TestArrayChunkStruct(t *testing.T) {
 		want [][]test
 	}{
 		"#1": {
-			args: nil,
+			args: []test{
+				{
+					v: 1,
+					s: "a",
+				},
+				{
+					v: 2,
+					s: "b",
+				},
+				{
+					v: 3,
+					s: "c",
+				},
+			},
 			size: 0,
 			want: nil,
 			err:  ErrArrayChunkSize,

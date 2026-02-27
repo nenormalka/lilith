@@ -6,17 +6,16 @@ import (
 )
 
 var (
-	ErrArrayChunkSize       = errors.New("size must be greater than 0")
-	ErrArrayChunkEmptySlice = errors.New("input slice must not be empty")
+	ErrArrayChunkSize = errors.New("size must be greater than 0")
 )
 
 func ArrayChunk[S ~[]T, T any](s S, size int) ([]S, error) {
-	if size < 1 {
-		return nil, ErrArrayChunkSize
+	if len(s) == 0 {
+		return nil, nil
 	}
 
-	if len(s) == 0 {
-		return nil, ErrArrayChunkEmptySlice
+	if size < 1 {
+		return nil, ErrArrayChunkSize
 	}
 
 	length := len(s)
